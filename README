@@ -27,8 +27,7 @@ system before you start.  Type "make check" or "make check_threads"
 
 The available interfaces are in ow-crypt.h, and this is the file you
 should include.  You won't need crypt.h.  When linking, add all of the
-C files and x86.S (you can compile and link it even on a non-x86, it
-will produce no code in this case).
+C files.
 
 
 2. Building the routines into GNU C library.
@@ -36,25 +35,24 @@ will produce no code in this case).
 For versions 2.13 and 2.14 (and likely other nearby ones), extract the
 library sources as usual.  Apply the patch for glibc 2.14 provided in
 this package.  Enter crypt/ and rename crypt.h to gnu-crypt.h within
-that directory.  Copy the C sources, header, and assembly (x86.S) files
-from this package in there as well (but be sure you don't overwrite the
-Makefile).  Configure, build, and install the library as usual.
+that directory.  Copy the C sources and header files from this package
+in there as well (but be sure you don't overwrite the Makefile).
+Configure, build, and install the library as usual.
 
 For versions 2.2 to 2.3.6 (and likely also for some newer ones),
 extract the library sources and maybe its optional add-ons as usual.
 Apply the patch for glibc 2.3.6 provided in this package.  Enter
 crypt/ and rename crypt.h to gnu-crypt.h within that directory.  Copy
-the C sources, header, and assembly (x86.S) files from this package in
-there as well (but be sure you don't overwrite the Makefile).
-Configure, build, and install the library as usual.
+the C sources, and header files from this package in there as well
+(but be sure you don't overwrite the Makefile).  Configure, build,
+and install the library as usual.
 
 For versions 2.1 to 2.1.3, extract the library sources and the crypt
 and linuxthreads add-ons as usual.  Apply the patch for glibc 2.1.3
 provided in this package.  Enter crypt/sysdeps/unix/, and rename
-crypt.h to gnu-crypt.h within that directory.  Copy C sources, header,
-and assembly (x86.S) files from this package in there as well (but be
-sure you don't overwrite the Makefile).  Configure, build, and install
-the library as usual.
+crypt.h to gnu-crypt.h within that directory.  Copy C sources and header
+files from this package in there as well (but be sure you don't overwrite
+the Makefile).  Configure, build, and install the library as usual.
 
 Programs that want to use the provided interfaces will need to include
 crypt.h (but not ow-crypt.h directly).  By default, prototypes for the
