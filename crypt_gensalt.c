@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <sys/param.h>
 
 #include <errno.h>
 #ifndef __set_errno
@@ -179,4 +180,70 @@ error:
 		output[0] = '\0';
 	errno = ENOMEM;
 	return NULL;
+}
+
+
+typedef unsigned int BF_word;
+
+static const unsigned char BF_itoa64[64 + 1] =
+	"./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+static void BF_encode(char *dst, const BF_word *src, int size)
+{
+	const unsigned char *sptr = (const unsigned char *)src;
+	const unsigned char *end = sptr + size;
+	unsigned char *dptr = (unsigned char *)dst;
+	unsigned int c1, c2;
+
+	do {
+		c1 = *sptr++;
+		*dptr++ = BF_itoa64[c1 >> 2];
+		c1 = (c1 & 0x03) << 4;
+		if (sptr >= end) {
+			*dptr++ = BF_itoa64[c1];
+			break;
+		}
+
+		c2 = *sptr++;
+		c1 |= c2 >> 4;
+		*dptr++ = BF_itoa64[c1];
+		c1 = (c2 & 0x0f) << 2;
+		if (sptr >= end) {
+			*dptr++ = BF_itoa64[c1];
+			break;
+		}
+
+		c2 = *sptr++;
+		c1 |= c2 >> 6;
+		*dptr++ = BF_itoa64[c1];
+		*dptr++ = BF_itoa64[c2 & 0x3f];
+	} while (sptr < end);
+}
+
+char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
+	const char *input, int size, char *output, int output_size)
+{
+	if (size < 16 || output_size < 7 + 22 + 1 ||
+	    (count && (count < 4 || count > 31)) ||
+	    prefix[0] != '$' || prefix[1] != '2' ||
+	    (prefix[2] != 'a' && prefix[2] != 'b' && prefix[2] != 'y')) {
+		if (output_size > 0) output[0] = '\0';
+		__set_errno((output_size < 7 + 22 + 1) ? ERANGE : EINVAL);
+		return NULL;
+	}
+
+	if (!count) count = 5;
+
+	output[0] = '$';
+	output[1] = '2';
+	output[2] = prefix[2];
+	output[3] = '$';
+	output[4] = '0' + count / 10;
+	output[5] = '0' + count % 10;
+	output[6] = '$';
+
+	BF_encode(&output[7], (const BF_word *)input, 16);
+	output[7 + 22] = '\0';
+
+	return output;
 }
