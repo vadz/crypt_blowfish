@@ -19,6 +19,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 
 #include <errno.h>
 #ifndef __set_errno
@@ -121,4 +122,61 @@ char *_crypt_gensalt_md5_rn(const char *prefix, unsigned long count,
 	}
 
 	return output;
+}
+
+#define SHA2_SALT_LEN_MAX 16
+#define SHA2_ROUNDS_MIN   1000
+#define SHA2_ROUNDS_MAX   999999999
+char *_crypt_gensalt_sha2_rn (const char *prefix, unsigned long count,
+	const char *input, int size, char *output, int output_size)
+
+{
+	char *o = output;
+	const char *i = input;
+	unsigned needed = 3 + MIN(size/3*4, SHA2_SALT_LEN_MAX) + 1;
+
+	if (size < 3 || output_size < needed)
+		goto error;
+
+	size = MIN(size, SHA2_SALT_LEN_MAX/4*3);
+
+	o[0] = prefix[0];
+	o[1] = prefix[1];
+	o[2] = prefix[2];
+	o += 3;
+
+	if (count) {
+		count = MAX(SHA2_ROUNDS_MIN, MIN(count, SHA2_ROUNDS_MAX));
+		int n = snprintf (o, output_size-3, "rounds=%ld$", count);
+		if (n < 0 || n >= output_size-3)
+			goto error;
+		needed += n;
+		o += n;
+	}
+
+	if (output_size < needed)
+		goto error;
+
+	while (size >= 3) {
+		unsigned long value =
+			(unsigned long)(unsigned char)i[0] |
+			((unsigned long)(unsigned char)i[1] << 8) |
+			((unsigned long)(unsigned char)i[2] << 16);
+		o[0] = _crypt_itoa64[value & 0x3f];
+		o[1] = _crypt_itoa64[(value >> 6) & 0x3f];
+		o[2] = _crypt_itoa64[(value >> 12) & 0x3f];
+		o[3] = _crypt_itoa64[(value >> 18) & 0x3f];
+		size -= 3;
+		i += 3;
+		o += 3;
+	}
+	o[0] = '\0';
+
+	return output;
+
+error:
+	if (output_size > 0)
+		output[0] = '\0';
+	errno = ENOMEM;
+	return NULL;
 }

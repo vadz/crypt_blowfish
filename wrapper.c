@@ -50,6 +50,10 @@
 #include "crypt.h"
 extern char *__md5_crypt_r(const char *key, const char *salt,
 	char *buffer, int buflen);
+extern char *__sha256_crypt_r (const char *key, const char *salt,
+	char *buffer, int buflen);
+extern char *__sha512_crypt_r (const char *key, const char *salt,
+	char *buffer, int buflen);
 /* crypt-entry.c needs to be patched to define __des_crypt_r rather than
  * __crypt_r, and not define crypt_r and crypt at all */
 extern char *__des_crypt_r(const char *key, const char *salt,
@@ -112,6 +116,10 @@ static char *_crypt_retval_magic(char *retval, const char *setting,
 char *__crypt_rn(__const char *key, __const char *setting,
 	void *data, int size)
 {
+	if (setting[0] == '$' && setting[1] == '6')
+		return __sha512_crypt_r(key, setting, (char *)data, size);
+	if (setting[0] == '$' && setting[1] == '5')
+		return __sha256_crypt_r(key, setting, (char *)data, size);
 	if (setting[0] == '$' && setting[1] == '2')
 		return _crypt_blowfish_rn(key, setting, (char *)data, size);
 	if (setting[0] == '$' && setting[1] == '1')
@@ -129,6 +137,16 @@ char *__crypt_rn(__const char *key, __const char *setting,
 char *__crypt_ra(__const char *key, __const char *setting,
 	void **data, int *size)
 {
+	if (setting[0] == '$' && setting[1] == '6') {
+		if (_crypt_data_alloc(data, size, CRYPT_OUTPUT_SIZE))
+			return NULL;
+		return __sha512_crypt_r(key, setting, (char *)*data, *size);
+	}
+	if (setting[0] == '$' && setting[1] == '5') {
+		if (_crypt_data_alloc(data, size, CRYPT_OUTPUT_SIZE))
+			return NULL;
+		return __sha256_crypt_r(key, setting, (char *)*data, *size);
+	}
 	if (setting[0] == '$' && setting[1] == '2') {
 		if (_crypt_data_alloc(data, size, CRYPT_OUTPUT_SIZE))
 			return NULL;
@@ -210,6 +228,9 @@ char *__crypt_gensalt_rn(const char *prefix, unsigned long count,
 		return NULL;
 	}
 
+	if (!strncmp(prefix, "$5$", 3) || !strncmp(prefix, "$6$", 3))
+		use = _crypt_gensalt_sha2_rn;
+	else
 	if (!strncmp(prefix, "$2a$", 4) || !strncmp(prefix, "$2b$", 4) ||
 	    !strncmp(prefix, "$2y$", 4))
 		use = _crypt_gensalt_blowfish_rn;

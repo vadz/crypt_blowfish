@@ -26,5 +26,7 @@ extern char *_crypt_gensalt_extended_rn(const char *prefix,
 	const char *input, int size, char *output, int output_size);
 extern char *_crypt_gensalt_md5_rn(const char *prefix, unsigned long count,
 	const char *input, int size, char *output, int output_size);
+extern char *_crypt_gensalt_sha2_rn(const char *prefix, unsigned long count,
+	const char *input, int size, char *output, int output_size);
 
 #endif
