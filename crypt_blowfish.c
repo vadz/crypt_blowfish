@@ -512,6 +512,7 @@ static void BF_swap(BF_word *x, int count)
 	R = L; \
 	L = tmp4 ^ data.ctx.P[BF_N + 1];
 
+#define BF_body() \
 	L = R = 0; \
 	ptr = data.ctx.P; \
 	do { \
