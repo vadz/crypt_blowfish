@@ -20,7 +20,12 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <sys/param.h>
+
+#undef MAX
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#undef MIN
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 #include <errno.h>
 #ifndef __set_errno
