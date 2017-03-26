@@ -141,7 +141,7 @@ char *_crypt_gensalt_sha2_rn (const char *prefix, unsigned long count,
 	const char *i = input;
 	unsigned needed = 3 + MIN(size/3*4, SHA2_SALT_LEN_MAX) + 1;
 
-	if (size < 3 || output_size < needed)
+	if (size < 3 || output_size < 0 || (unsigned)output_size < needed)
 		goto error;
 
 	size = MIN(size, SHA2_SALT_LEN_MAX/4*3);
@@ -160,7 +160,7 @@ char *_crypt_gensalt_sha2_rn (const char *prefix, unsigned long count,
 		o += n;
 	}
 
-	if (output_size < needed)
+	if ((unsigned)output_size < needed)
 		goto error;
 
 	while (size >= 3) {
@@ -243,7 +243,7 @@ char *_crypt_gensalt_blowfish_rn(const char *prefix, unsigned long count,
 	output[1] = '2';
 	output[2] = prefix[2];
 	output[3] = '$';
-	output[4] = '0' + count / 10;
+	output[4] = (char)('0' + count / 10);
 	output[5] = '0' + count % 10;
 	output[6] = '$';
 

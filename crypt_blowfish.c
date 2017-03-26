@@ -387,7 +387,7 @@ static int BF_decode(BF_word *dst, const char *src, int size)
 	do {
 		BF_safe_atoi64(c1, *sptr++);
 		BF_safe_atoi64(c2, *sptr++);
-		*dptr++ = (c1 << 2) | ((c2 & 0x30) >> 4);
+		*dptr++ = (unsigned char)((c1 << 2) | ((c2 & 0x30) >> 4));
 		if (dptr >= end) break;
 
 		BF_safe_atoi64(c3, *sptr++);
@@ -395,7 +395,7 @@ static int BF_decode(BF_word *dst, const char *src, int size)
 		if (dptr >= end) break;
 
 		BF_safe_atoi64(c4, *sptr++);
-		*dptr++ = ((c3 & 0x03) << 6) | c4;
+		*dptr++ = (unsigned char)(((c3 & 0x03) << 6) | c4);
 	} while (dptr < end);
 
 	return 0;
