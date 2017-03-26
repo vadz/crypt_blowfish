@@ -37,6 +37,10 @@
 #define __crypt_gensalt crypt_gensalt
 #endif
 
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif
+
 char *__crypt_gensalt_rn(const char *prefix, unsigned long count,
 	const char *input, int size, char *output, int output_size)
 {
